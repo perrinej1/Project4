@@ -4,9 +4,9 @@ Our goal in this project is to explore page tables and their use.
 ## Resources
 - The xv6-riscv version of the xv6 bookLinks to an external site. may be useful here, especially looking at the Page Tables chapter
 - Within the xv6-riscv kernel code, the key files will be:
-- memlayout.h describing the memory layout
-- vm.c which implements (most of) the virtual memory code
-- kalloc.c which implements allocation and freeing of physical memory
+  - memlayout.h describing the memory layout
+  - vm.c which implements (most of) the virtual memory code
+  - kalloc.c which implements allocation and freeing of physical memory
 - I'll just note that MIT also suggests their students refer to the RISC-V privileged architecture manualLinks to an external site.
 
 ## Part 1: What does a page table in RISC-V look like? [50 points]
