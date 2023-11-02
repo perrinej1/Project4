@@ -440,13 +440,16 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 
 // Takes a pagetable_t argument and prints
 // page table in a certain format
-// Prints, but not in the correct way. Fix this
+// Depth: how far the tree it is down
 void
-vmprint(pagetable_t pagetable)
+vmprint(pagetable_t pagetable, int depth)
 {
   // print argument to vmprint
-  // can't do this when called in if statement, find a way to only do in start
-  printf("pagetable %p\n", pagetable);
+  // checks if depth is equal to 0 (fist instance)
+  if(depth == 0)
+  {
+    printf("pagetable %p\n", pagetable);
+  }
 
   // there are 512 PTEs in a page table
   for(int i = 0; i < 512; i++)
@@ -455,19 +458,29 @@ vmprint(pagetable_t pagetable)
     if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0)
     {
       // indicates depth of tree
-      // Figure out how to get this stuff to work
-      printf(" ..");
+      for(int j = 0; j < depth + 1; j++)
+      {
+        printf(" ..");
+      }
+
+      printf("%d: pte %p pa %p\n", i, pte, PTE2PA(pte));
 
       // this PTE points to a lower-level page table
       uint64 child = PTE2PA(pte);
-      vmprint((pagetable_t)child);
-      //pagetable[i] = 0;
-      printf("%d: pte %p pa %p\n", i, pte, child);
+      depth++;
+      vmprint((pagetable_t)child, depth);
+
+      // reset the depth after
+      depth--;
     }
     else if(pte & PTE_V)
     {
-      // good so print
-      // figure out what to do here along with this print
+      // indicates depth of the tree
+      for(int k = 0; k < depth + 1; k++)
+      {
+        printf(" ..");
+      }
+
       printf("%d: pte %p pa %p\n", i, pte, PTE2PA(pte));
     }
   }
