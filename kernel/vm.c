@@ -485,3 +485,9 @@ vmprint(pagetable_t pagetable, int depth)
     }
   }
 }
+
+int
+pgaccess(int va, int numPages, int *ua)
+{
+  return 0;
+}
