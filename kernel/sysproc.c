@@ -90,8 +90,18 @@ sys_uptime(void)
   return xticks;
 }
 
+// reports/returns which pages have been accessed
 uint64
 sys_pgaccess(void)
 {
-  return 0;
+  uint64  virtAddr;
+  int numPages;
+  uint64  output;
+
+  // parsing arguments
+  argaddr(0, &virtAddr);
+  argint(0, &numPages);
+  argaddr(0, &output);
+
+  return pgaccess((char *)virtAddr, numPages, (int *)output);
 }

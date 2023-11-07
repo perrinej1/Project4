@@ -486,8 +486,19 @@ vmprint(pagetable_t pagetable, int depth)
   }
 }
 
+// return -1 if numPages is above upper limit of pages scanned
+// return copyout to user if bellow limit
 int
-pgaccess(int va, int numPages, int *ua)
+pgaccess(char *virtAddr, int numPages, int *output)
 {
-  return 0;
+  int bitmask = 512;    //512 pages in PTE, upper limit
+  int results;
+
+  if(numPages > bitmask)
+  {
+    return -1;
+  }
+
+  // copyout to user
+  return either_copyout(1, (uint64)output, &results, sizeof(int));
 }
