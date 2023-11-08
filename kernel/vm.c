@@ -498,6 +498,7 @@ pgaccess(char *virtAddr, int numPages, int *output)
   {
     return -1;
   }
+  // need to add stuff here
 
   // copyout to user
   return either_copyout(1, (uint64)output, &results, sizeof(int));
