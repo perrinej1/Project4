@@ -95,13 +95,14 @@ uint64
 sys_pgaccess(void)
 {
   uint64  virtAddr;
-  int numPages;
+  int pages;
   uint64  output;
+  pagetable_t pagetable = myproc() -> pagetable;
 
   // parsing arguments
   argaddr(0, &virtAddr);
-  argint(0, &numPages);
+  argint(0, &pages);
   argaddr(0, &output);
 
-  return pgaccess((char *)virtAddr, numPages, (int *)output);
+  return pgaccess((char *)virtAddr, pages, (int *)output, pagetable);
 }

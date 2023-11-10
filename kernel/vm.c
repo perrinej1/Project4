@@ -96,7 +96,7 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
       if(!alloc || (pagetable = (pde_t*)kalloc()) == 0)
         return 0;
       memset(pagetable, 0, PGSIZE);
-      *pte = PA2PTE(pagetable) | PTE_V;
+      *pte = PA2PTE(pagetable) | PTE_V | PTE_A;
     }
   }
   return &pagetable[PX(0, va)];
@@ -155,7 +155,7 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)
       return -1;
     if(*pte & PTE_V)
       panic("mappages: remap");
-    *pte = PA2PTE(pa) | perm | PTE_V;
+    *pte = PA2PTE(pa) | perm | PTE_V | PTE_A;
     if(a == last)
       break;
     a += PGSIZE;
@@ -486,19 +486,48 @@ vmprint(pagetable_t pagetable, int depth)
   }
 }
 
-// return -1 if numPages is above upper limit of pages scanned
-// return copyout to user if bellow limit
+// Reports which pages have been accessed.
+// First argument - starting virtual address of first page to check.
+// Second argument - number of pages to check.
+// Third argument - takes user address to a buffer to store results into
+// a bitmask.
+// Fourth argument - the pagetable, used for to help use the walk function.
+// returns -1 if number of pages exceeds the bitmask size,
+// otherwise copyouts findings to user.
 int
-pgaccess(char *virtAddr, int numPages, int *output)
+pgaccess(char *virtAddr, int pages, int *output, pagetable_t pagetable)
 {
-  int bitmask = 512;    //512 pages in PTE, upper limit
-  int results;
+  int bitmask = PGSIZE * 8;
+  int results = 0;
+  pte_t *pte;
 
-  if(numPages > bitmask)
+  // check if number of pages exceeds bitmask
+  if(pages > bitmask)
   {
     return -1;
   }
-  // need to add stuff here
+
+  // loop through pages
+  for(int i = 0; i < pages; i++)
+  {
+    // use walk to get address for the pte its on.
+    pte = walk(pagetable, (uint64)virtAddr, 0);
+
+    // checks for right pte
+    if(pte != 0)
+    {
+      // tests for an access bit
+      if(*pte & PTE_A)
+      {
+        // sets access bit
+        results = results | (1 << i);
+      }
+      // unset access bit
+      *pte = *pte ^ PTE_A;
+    }
+    // get the next page
+    virtAddr = virtAddr + PGSIZE;
+  }
 
   // copyout to user
   return either_copyout(1, (uint64)output, &results, sizeof(int));
